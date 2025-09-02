@@ -1,19 +1,19 @@
-import express from "express";
-import type { Request, Response } from "express";
+import express from 'express';
+import type { Request, Response } from 'express';
 
 // set dotenv package
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
 
-const app  = express();
+const app = express();
 
 // port
 const port = process.env.PORT || 3000;
 
-app.get("/api/hello", (req: Request, res: Response) => {
-  res.json({ message: `Hello World, My Friend` });
+app.get('/api/hello', (req: Request, res: Response) => {
+    res.json({ message: `Hello World, My Friend` });
 });
 
 app.listen(port, () => {
-  console.log(`Server is  running on http://localhost:${port}`);
+    console.log(`Server is  running on http://localhost:${port}`);
 });
