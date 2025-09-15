@@ -7,15 +7,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
  && apt-get install -y --no-install-recommends nodejs \
  && rm -rf /var/lib/apt/lists/*
 
-# Contexto do build = RAIZ do monorepo (ajustado no workflow)
+# Contexto do build = RAIZ do monorepo (definido no workflow)
 WORKDIR /app
 COPY . .
 
-# Desativa husky e quaisquer scripts de instalação no monorepo
+# Desativa hooks e scripts de prepare; instala workspaces
 ENV HUSKY=0 CI=1
-# Se seu repo usa workspaces, esses flags garantem a instalação p/ todos
 RUN npm ci --workspaces --include-workspace-root --ignore-scripts \
  || npm install --workspaces --include-workspace-root --ignore-scripts
+
+# 👇 Workaround do bug do npm com optional deps do Rollup
+# Garante o pacote nativo para linux/amd64 (Ubuntu do GitHub Actions)
+RUN npm i -D @rollup/rollup-linux-x64-gnu --ignore-scripts || true
 
 # Build do client
 WORKDIR /app/packages/client
