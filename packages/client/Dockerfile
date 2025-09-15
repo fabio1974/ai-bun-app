@@ -1,24 +1,22 @@
-# Etapa 1: build com bun
-FROM oven/bun:1.1.13 as builder
-
-# Instale o git
-RUN apt-get update && apt-get install -y git curl
-
-# Instale o Node.js (exemplo: 22.x)
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
-    apt-get install -y nodejs
-
+# Etapa 1: build (usando Bun + npm para deps do client)
+FROM oven/bun:1.1.13 AS builder
 WORKDIR /app
+
+# contexto na raiz do repo (ajuste seu workflow para context: .)
 COPY . .
 
+# --- CLIENT ---
 WORKDIR /app/packages/client
 ENV HUSKY=0
-RUN bun install
-RUN bun run build
+# se existe package-lock.json:
+RUN npm ci || npm install
+# agora o build pode ser com bun ou npm; ambos funcionam
+# RUN bun run build
+RUN npm run build
 
-# Etapa 2: serve build estaticamente com nginx
-FROM nginx:alpine
+# Etapa 2: nginx servindo estático
+FROM nginx:alpine AS runner
 COPY --from=builder /app/packages/client/dist /usr/share/nginx/html
 COPY packages/client/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["nginx","-g","daemon off;"]
