@@ -9,16 +9,17 @@ on:
 
 permissions:
   contents: read
-  packages: write  # necessário para publicar no GHCR
+  packages: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         service:
           - name: client
-            context: .
+            context: .                         # <<< raiz do monorepo
             dockerfile: packages/client/Dockerfile
           - name: server
             context: packages/server

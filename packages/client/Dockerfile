@@ -1,20 +1,23 @@
-# Etapa 1: build (usando Bun + npm para deps do client)
+# Etapa 1: build com Bun + npm (para resolver @rollup/* nativos)
 FROM oven/bun:1.1.13 AS builder
-WORKDIR /app
 
-# contexto na raiz do repo (ajuste seu workflow para context: .)
+# Instala Node/npm (necessário para optional deps do Rollup)
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
+ && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+ && apt-get install -y --no-install-recommends nodejs \
+ && rm -rf /var/lib/apt/lists/*
+
+# Contexto do build deve ser a RAIZ do monorepo (definido no workflow)
+WORKDIR /app
 COPY . .
 
-# --- CLIENT ---
+# Build do client
 WORKDIR /app/packages/client
 ENV HUSKY=0
-# se existe package-lock.json:
 RUN npm ci || npm install
-# agora o build pode ser com bun ou npm; ambos funcionam
-# RUN bun run build
 RUN npm run build
 
-# Etapa 2: nginx servindo estático
+# Etapa 2: Nginx servindo estático
 FROM nginx:alpine AS runner
 COPY --from=builder /app/packages/client/dist /usr/share/nginx/html
 COPY packages/client/nginx.conf /etc/nginx/conf.d/default.conf
