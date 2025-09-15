@@ -1,0 +1,10 @@
+node_modules
+bun_modules
+dist
+build
+.cache
+.next
+.vite
+*.log
+*.tsbuildinfo
+.DS_Store

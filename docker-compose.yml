@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+    server:
+        build:
+            context: ./packages/server
+            dockerfile: Dockerfile
+        ports:
+            - '3000:3000'
+        environment:
+            - NODE_ENV=production
+        # Se precisar de variáveis do .env, adicione:
+        # env_file:
+        #   - ./packages/server/.env
+
+    client:
+        build:
+            context: . # raiz do monorepo!
+            dockerfile: packages/client/Dockerfile
+        ports:
+            - '5173:80'
+        depends_on:
+            - server
