@@ -1,19 +1,40 @@
-import { Button } from './ui/button';
-import { AiOutlineArrowUp } from 'react-icons/ai';
+import { useState, useRef, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import ChatMessages from './ChatMessages';
+import ChatInput from './ChatInput';
+
+type ChatResponse = {
+    message: string;
+    role: 'user' | 'bot';
+};
 
 const ChatBox = () => {
+    const [loading, setLoading] = useState(false);
+    const [messages, setMessages] = useState<ChatResponse[]>([]);
+
+    const conversationIdRef = useRef<string>(uuidv4());
+    const chatContainerRef = useRef<HTMLDivElement>(null!);
+
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop =
+                chatContainerRef.current.scrollHeight;
+        }
+    }, [messages, loading]);
+
     return (
-        <div className="flex flex-col items-center border-2 border-gray-300 rounded-lg p-6 w-full">
-            <textarea
-                className="mb-4 p-2 outline-none border-none resize-none rounded w-full"
-                rows={4}
-                placeholder="Type your message...!"
+        <div className="flex flex-col h-[90vh] w-full overflow-hidden">
+            <ChatMessages
+                messages={messages}
+                loading={loading}
+                chatContainerRef={chatContainerRef}
             />
-            <div className="flex w-full justify-end">
-                <Button className="flex items-center justify-center border-2 border-blue-500 rounded-full w-9 h-9 p-0">
-                    <AiOutlineArrowUp size={20} />
-                </Button>
-            </div>
+            <ChatInput
+                loading={loading}
+                setMessages={setMessages}
+                setLoading={setLoading}
+                conversationIdRef={conversationIdRef}
+            />
         </div>
     );
 };
